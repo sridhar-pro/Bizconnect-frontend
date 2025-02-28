@@ -12,7 +12,7 @@ const Home = () => {
 
   const loadTasks = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/tasks");
+      const response = await axios.get("https://bizconnect-backend.onrender.com/api/tasks");
       setTasks(response.data);
     } catch (error) {
       console.error("Error fetching tasks:", error);

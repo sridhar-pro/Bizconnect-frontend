@@ -15,7 +15,7 @@ const TaskForm = () => {
 
   const loadTask = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/tasks/${id}`);
+      const response = await axios.get(`https://bizconnect-backend.onrender.com/api/tasks/${id}`);
       setTask(response.data); // Prefill form with task details
     } catch (error) {
       console.error("Error loading task:", error);
@@ -32,10 +32,10 @@ const TaskForm = () => {
     try {
       if (id) {
         // Update task
-        await axios.put(`http://localhost:5000/api/tasks/${id}`, task);
+        await axios.put(`https://bizconnect-backend.onrender.com/api/tasks/${id}`, task);
       } else {
         // Add new task
-        await axios.post("http://localhost:5000/api/tasks", task);
+        await axios.post("https://bizconnect-backend.onrender.com/api/tasks", task);
       }
       navigate("/"); // Redirect back to home page
     } catch (error) {
