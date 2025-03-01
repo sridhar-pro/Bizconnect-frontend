@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { motion } from "framer-motion";
+import { io } from "socket.io-client";
+
+const socket = io("https://bizconnect-backend.onrender.com"); 
 
 const TaskForm = () => {
-  const { id } = useParams(); // Get task ID from URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [task, setTask] = useState({ title: "", description: "" });
 
@@ -16,7 +20,7 @@ const TaskForm = () => {
   const loadTask = async () => {
     try {
       const response = await axios.get(`https://bizconnect-backend.onrender.com/api/tasks/${id}`);
-      setTask(response.data); // Prefill form with task details
+      setTask(response.data);
     } catch (error) {
       console.error("Error loading task:", error);
     }
@@ -28,80 +32,66 @@ const TaskForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       if (id) {
-        // Update task
-        await axios.put(`https://bizconnect-backend.onrender.com/api/tasks/${id}`, task);
+        const updatedTask = await axios.put(`https://bizconnect-backend.onrender.com/api/tasks/${id}`, task);
+        socket.emit("updateTask", updatedTask.data); // Emit event to WebSocket
       } else {
-        // Add new task
-        await axios.post("https://bizconnect-backend.onrender.com/api/tasks", task);
+        const newTask = await axios.post("https://bizconnect-backend.onrender.com/api/tasks", task);
+        socket.emit("newTask", newTask.data); // Emit event to WebSocket
       }
-      navigate("/"); // Redirect back to home page
+      navigate("/");
     } catch (error) {
       console.error("Error saving task:", error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-6">
-      <div className="w-full max-w-lg bg-white bg-opacity-90 backdrop-blur-md shadow-2xl rounded-2xl p-8">
-        {/* Heading */}
-        <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-6 flex items-center justify-center gap-2">
-          <svg
-            className="w-8 h-8 text-blue-600"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2"></path>
-          </svg>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#1e293b] p-6">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-lg bg-white/10 backdrop-blur-lg shadow-xl rounded-3xl p-8 border border-white/20"
+      >
+        <motion.h2
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="text-3xl font-extrabold text-gray-100 text-center mb-6 flex items-center justify-center gap-2 uppercase"
+        >
           {id ? "Edit Task" : "Add Task"}
-        </h2>
+        </motion.h2>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Task Title Input */}
+        <motion.form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-gray-700 font-medium">Task Title</label>
+            <label className="block text-gray-100 font-medium italic">Task Title</label>
             <input
               type="text"
               name="title"
               value={task.title}
               onChange={handleChange}
               placeholder="Enter task title"
-              className="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full p-3 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
-
-          {/* Task Description Input */}
           <div>
-            <label className="block text-gray-700 font-medium">Task Description</label>
+            <label className="block text-gray-100 font-medium italic">Task Description</label>
             <textarea
               name="description"
               value={task.description}
               onChange={handleChange}
               placeholder="Enter task description"
-              className="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none h-28"
+              className="w-full p-3 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 h-28"
               required
             ></textarea>
           </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-semibold rounded-lg shadow-md flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"></path>
-            </svg>
+          <motion.button type="submit" className="w-full bg-blue-600 text-white px-6 py-3 font-semibold rounded-xl">
             {id ? "Update Task" : "Save Task"}
-          </button>
-        </form>
-      </div>
+          </motion.button>
+        </motion.form>
+      </motion.div>
     </div>
   );
 };

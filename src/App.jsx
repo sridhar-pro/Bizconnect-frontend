@@ -8,7 +8,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/task" element={<TaskForm />} /> 
-        <Route path="/task/:id" element={<TaskForm />} /> {/* Support editing */}
+        <Route path="/task/:id" element={<TaskForm />} /> 
       </Routes>
     </Router>
   );
